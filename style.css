@@ -1,0 +1,10 @@
+body{
+    text-align: center;
+    background-color: rgb(11, 7, 7);
+    color:white;
+}
+
+canvas{
+    margin:20px;
+    border: 2px solid white;
+}
