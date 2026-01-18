@@ -13,19 +13,45 @@ let apple = { x: 0, y: 0 };
 canvas.width = COLS * 20;
 canvas.height = ROWS * 20;
 
+const deathSound = new Audio("sound/actually-good-fahhhh-sfx.mp3");
+deathSound.volume = 1;
+
+let musicstart=false;
+let bgmusic=new Audio("sound/Toby Fox - DELTARUNE Chapters 3+4 OST - 33 SWORD.mp3");
+bgmusic.volume=0.3;
+let appleSoundEffect=new Audio("snd-crownshrink.mp3");
+appleSoundEffect.volume=0.6;
+bgmusic.loop=true;
+
 ctx.scale(20, 20);
 let direction = { x: 0, y: -1 };
 document.addEventListener('keydown', event => {
     if (event.key == 'ArrowDown'&&direction.y!==-1) {
+        if(!musicstart){
+            bgmusic.play();
+            musicstart=true;
+        }
         direction = { x: 0, y: 1 };
     }
     if (event.key == 'ArrowUp'&&direction.y!==1) {
+        if(!musicstart){
+            bgmusic.play();
+            musicstart=true;
+        }
         direction = { x: 0, y: -1 };
     }
     if (event.key == 'ArrowLeft'&&direction.x!==1) {
+        if(!musicstart){
+            bgmusic.play();
+            musicstart=true;
+        }
         direction = { x: -1, y: 0 };
     }
     if (event.key == 'ArrowRight'&&direction.x!==-1) {
+        if(!musicstart){
+            bgmusic.play();
+            musicstart=true;
+        }
         direction = { x: 1, y: 0 };
     }
 });
@@ -35,7 +61,6 @@ function createSnake() {
         body: [{ x: 10, y: 0 },
         { x: 10, y: 1 },
         { x: 10, y: 2 }],
-        direction: "DOWN"
     };
 }
 
@@ -46,6 +71,9 @@ function collide(newhead,willgrow){
     const limit=willgrow? length:length-1;
     for(let i=0;i<limit;i++){
         if(newhead.x===Snake.body[i].x&&newhead.y===Snake.body[i].y){
+            bgmusic.pause();
+            deathSound.currentTime = 0;
+            deathSound.play();
             return true;
         }
     }
@@ -90,6 +118,8 @@ function movesnake(dir) {
 
     if(willgrow)
     {
+        appleSoundEffect.currentTime=0;
+        appleSoundEffect.play();
         spawnapple();
         Snake.body.unshift(newhead);
     }
