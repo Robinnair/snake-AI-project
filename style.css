@@ -8,3 +8,40 @@ canvas{
     margin:20px;
     border: 2px solid white;
 }
+
+#Bottom_text {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 20px;
+
+    text-shadow: 
+        0 0 4px rgba(255,255,255,0.4),
+        0 0 8px rgba(255,255,255,0.3);
+
+    animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        text-shadow:
+            0 0 4px rgba(255,255,255,0.3),
+            0 0 8px rgba(255,255,255,0.2);
+        opacity: 0.85;
+    }
+
+    50% {
+        text-shadow:
+            0 0 6px rgba(255,255,255,0.8),
+            0 0 14px rgba(255,255,255,0.6),
+            0 0 24px rgba(255,255,255,0.3);
+        opacity: 1;
+    }
+
+    100% {
+        text-shadow:
+            0 0 4px rgba(255,255,255,0.3),
+            0 0 8px rgba(255,255,255,0.2);
+        opacity: 0.85;
+    }
+}

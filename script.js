@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 const ROWS = 20;
 const COLS = 20;
 
+let gameover=false;
 const moveInterval = 100;
 let lastTime = 0;
 
@@ -13,18 +14,18 @@ canvas.width = COLS * 20;
 canvas.height = ROWS * 20;
 
 ctx.scale(20, 20);
-let direction = { x: 0, y: 1 };
+let direction = { x: 0, y: -1 };
 document.addEventListener('keydown', event => {
-    if (event.key == 'ArrowDown') {
+    if (event.key == 'ArrowDown'&&direction.y!==-1) {
         direction = { x: 0, y: 1 };
     }
-    if (event.key == 'ArrowUp') {
+    if (event.key == 'ArrowUp'&&direction.y!==1) {
         direction = { x: 0, y: -1 };
     }
-    if (event.key == 'ArrowLeft') {
+    if (event.key == 'ArrowLeft'&&direction.x!==1) {
         direction = { x: -1, y: 0 };
     }
-    if (event.key == 'ArrowRight') {
+    if (event.key == 'ArrowRight'&&direction.x!==-1) {
         direction = { x: 1, y: 0 };
     }
 });
@@ -39,6 +40,17 @@ function createSnake() {
 }
 
 const Snake = createSnake();
+
+function collide(newhead,willgrow){
+    const length=Snake.body.length;
+    const limit=willgrow? length:length-1;
+    for(let i=0;i<limit;i++){
+        if(newhead.x===Snake.body[i].x&&newhead.y===Snake.body[i].y){
+            return true;
+        }
+    }
+    return false;
+}
 
 function spawnapple() {
     while (true) {
@@ -68,7 +80,15 @@ function movesnake(dir) {
         x: (head.x + dir.x + COLS) % COLS,
         y: (head.y + dir.y + ROWS) % ROWS
     }
-    if(newhead.x===apple.x&&newhead.y===apple.y)
+
+    const willgrow=newhead.x===apple.x&&newhead.y===apple.y;
+
+    if(collide(newhead,willgrow)){
+        gameover=true;
+        return;
+    }
+
+    if(willgrow)
     {
         spawnapple();
         Snake.body.unshift(newhead);
@@ -83,9 +103,13 @@ function movesnake(dir) {
 }
 
 function gameLoop(time = 0) {
-    if (time - lastTime > moveInterval) {
+    if (!gameover&&time - lastTime > moveInterval) {
         movesnake(direction);
         lastTime = time;
+    }
+    if(gameover){
+        document.querySelector('#Bottom_text').innerHTML="Game Over";
+        return;
     }
     requestAnimationFrame(gameLoop);
 }
