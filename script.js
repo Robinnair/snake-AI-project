@@ -155,11 +155,14 @@ function movesnake(dir) {
 
 function gameLoop(time = 0) {
     if (!gameover && time - lastTime > moveInterval) {
-        const aidir = aichosepath();
+        const aidir = aichoosepath();
         movesnake(aidir);
         lastTime = time;
     }
     if (gameover) {
+        bgmusic.pause();
+        deathSound.currentTime = 0;
+        deathSound.play();
         document.querySelector('#Bottom_text').innerHTML = "Game Over";
         return;
     }
@@ -236,7 +239,7 @@ function getdirection(a, b) {
     };
 }
 
-function aichosepath() {
+function aichoosepath() {
     const path = bfspath();
     if (path && path.length > 1) {
         const head = Snake.body[0];
@@ -253,12 +256,6 @@ function safefallback() {
         const ny = (head.y + d.y + ROWS) % ROWS;
         if (!checkCollision({ x: nx, y: ny }, false)) {
             return d;
-        }
-        else
-        {
-            bgmusic.pause();
-            deathSound.currentTime = 0;
-            deathSound.play();
         }
     }
 
