@@ -23,6 +23,13 @@ let appleSoundEffect=new Audio("snd-crownshrink.mp3");
 appleSoundEffect.volume=0.6;
 bgmusic.loop=true;
 
+const DIRS=
+[{x:0,y:1},//down
+ {x:0,y:-1},//up
+ {x:1,y:0},//right
+ {x:-1,y:0}//left
+];
+
 ctx.scale(20, 20);
 let direction = { x: 0, y: -1 };
 document.addEventListener('keydown', event => {
@@ -143,6 +150,71 @@ function gameLoop(time = 0) {
     }
     requestAnimationFrame(gameLoop);
 }
+
+//BFS LOGIC:
+
+function key(x,y){
+    return `${x},${y}`;
+}
+
+function getBlockedSet(){
+    const blocked=new Set();
+    for( let i=0;i<Snake.body.length-1;i++){
+        const s=Snake.body[i];
+        blocked.add(key(s.x,s.y));
+    }
+    return blocked;
+}
+
+function bfspath(){
+    const head=Snake.body[0];
+    const target=apple;
+
+    const queue=[];
+    const visited=new Set();
+    const parent=new Map();
+    
+    const blocked=getBlockedSet();
+
+    queue.push(head);
+    visited.add(key(head.x,head.y));
+    while(queue.length>0){
+        const cur=queue.shift();
+        if(cur.x===target.x&&cur.y===target.y){
+            return reconstructPath(parent,cur);
+        }
+        for(const d of DIRS){
+            const nx=(cur.x+d.x+COLS)%COLS;
+            const ny=(cur.y+d.y+ROWS)%ROWS;
+            const k=key(nx,ny);
+            if(visited.has(k))
+            {
+                continue;
+            }
+            if(blocked.has(k)){
+                continue;
+            }
+
+            visited.add(k);
+            parent.set(k,cur);
+            queue.push({x:nx,y:ny});
+        }
+    }
+    return null;
+}
+
+function reconstructPath(parent,end){
+    const path=[];
+    let cur=end;
+    while(parent.has(key(cur.x,cur.y))){
+        path.push(cur);
+        cur=parent.get(key(cur.x,cur.y));
+    }
+    path.push(cur);
+    path.reverse();
+    return path;
+}
+
 
 gameLoop();
 /*
