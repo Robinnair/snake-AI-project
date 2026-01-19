@@ -142,8 +142,8 @@ function movesnake(dir) {
     if (willgrow) {
         appleSoundEffect.currentTime = 0;
         appleSoundEffect.play();
-        spawnapple();
         Snake.body.unshift(newhead);
+        spawnapple();
     }
     else {
         Snake.body.unshift(newhead);
