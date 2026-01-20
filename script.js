@@ -240,13 +240,53 @@ function getdirection(a, b) {
 }
 
 function aichoosepath() {
-    const path = bfspath();
+    let path = bfspath();
+    if (path && path.length > 1) {
+        const head = Snake.body[0];
+        const next = path[1];
+        return getdirection(head, next);
+    }
+    path = chaseTail();
     if (path && path.length > 1) {
         const head = Snake.body[0];
         const next = path[1];
         return getdirection(head, next);
     }
     return safefallback();
+}
+
+function chaseTail(){
+    const head=Snake.body[0];
+    const target=Snake.body[Snake.body.length-1];
+    const visited= new Set();
+    const parent= new Map();
+    const queue=[];
+    const blocked=getBlockedSet();
+    queue.push(head);
+    visited.add(key(head.x,head.y));
+    while(queue.length>0){
+        const cur=queue.shift();
+        if(cur.x==target.x&&cur.y==target.y){
+            return reconstructPath(parent,cur);
+        }
+        for(const d of DIRS){
+            const nx=(cur.x+d.x+COLS)%COLS;
+            const ny=(cur.y+d.y+ROWS)%ROWS;
+            const k=key(nx,ny);
+            if(visited.has(k))
+            {
+                continue;
+            }
+            if(blocked.has(k)){
+                continue;
+            }
+
+            visited.add(k);
+            parent.set(k,cur);
+            queue.push({x:nx,y:ny});
+        }
+    }
+    return null;
 }
 
 function safefallback() {
