@@ -119,7 +119,16 @@ function drawSnake() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "lightgreen";
     for (let segment of Snake.body) {
-        ctx.fillRect(segment.x, segment.y, 1, 1);
+        if(Snake.body[0]===segment)
+        {
+            ctx.fillStyle = "violet";
+            ctx.fillRect(segment.x, segment.y, 1, 1);
+        }
+        else
+        {
+            ctx.fillStyle = "lightgreen";
+            ctx.fillRect(segment.x, segment.y, 1, 1);
+        }
     }
     ctx.fillStyle = "red"
     ctx.fillRect(apple.x, apple.y, 1, 1)
@@ -184,40 +193,41 @@ function getBlockedSet() {
     return blocked;
 }
 
-function bfspath() {
-    const head = Snake.body[0];
-    const target = apple;
-
+function bfsPath(start, target, snakeBody) {
     const queue = [];
     const visited = new Set();
     const parent = new Map();
 
-    const blocked = getBlockedSet();
+    const blocked = new Set();
+    for (let i = 0; i < snakeBody.length - 1; i++) {
+        blocked.add(key(snakeBody[i].x, snakeBody[i].y));
+    }
 
-    queue.push(head);
-    visited.add(key(head.x, head.y));
+    queue.push(start);
+    visited.add(key(start.x, start.y));
+
     while (queue.length > 0) {
-        const cur = queue.shift();
-        if (cur.x === target.x && cur.y === target.y) {
-            return reconstructPath(parent, cur);
+        const current = queue.shift();
+
+        if (current.x === target.x && current.y === target.y) {
+            return reconstructPath(parent, current, start);
         }
+
         for (const d of DIRS) {
-            const nx = (cur.x + d.x + COLS) % COLS;
-            const ny = (cur.y + d.y + ROWS) % ROWS;
+            const nx = (current.x + d.x + COLS) % COLS;
+            const ny = (current.y + d.y + ROWS) % ROWS;
             const k = key(nx, ny);
-            if (visited.has(k)) {
-                continue;
-            }
-            if (blocked.has(k)) {
-                continue;
-            }
+
+            if (visited.has(k)) continue;
+            if (blocked.has(k)) continue;
 
             visited.add(k);
-            parent.set(k, cur);
+            parent.set(k, current);
             queue.push({ x: nx, y: ny });
         }
     }
-    return null;
+
+    return null; 
 }
 
 function reconstructPath(parent, end) {
@@ -233,60 +243,30 @@ function reconstructPath(parent, end) {
 }
 
 function getdirection(a, b) {
-    return {
-        x: b.x - a.x,
-        y: b.y - a.y
-    };
+    const dx=b.x-a.x;
+    const dy=b.y-a.y;
+    if(dx>1) return {x:-1,y:0};
+    if(dx<-1) return {x:1,y:0};
+    if(dy>1) return {x:0,y:-1};
+    if(dy<-1) return {x:0,y:1};
+
+    return {x:Math.sign(dx),y:Math.sign(dy)};
 }
 
 function aichoosepath() {
-    let path = bfspath();
-    if (path && path.length > 1) {
+    let path = bfsPath(Snake.body[0],apple,Snake.body);
+    if (path && path.length > 1&&isAppleSafe()) {
         const head = Snake.body[0];
         const next = path[1];
         return getdirection(head, next);
     }
-    path = chaseTail();
+    path = bfsPath(Snake.body[0],Snake.body[Snake.body.length-1],Snake.body);
     if (path && path.length > 1) {
         const head = Snake.body[0];
         const next = path[1];
         return getdirection(head, next);
     }
     return safefallback();
-}
-
-function chaseTail(){
-    const head=Snake.body[0];
-    const target=Snake.body[Snake.body.length-1];
-    const visited= new Set();
-    const parent= new Map();
-    const queue=[];
-    const blocked=getBlockedSet();
-    queue.push(head);
-    visited.add(key(head.x,head.y));
-    while(queue.length>0){
-        const cur=queue.shift();
-        if(cur.x==target.x&&cur.y==target.y){
-            return reconstructPath(parent,cur);
-        }
-        for(const d of DIRS){
-            const nx=(cur.x+d.x+COLS)%COLS;
-            const ny=(cur.y+d.y+ROWS)%ROWS;
-            const k=key(nx,ny);
-            if(visited.has(k))
-            {
-                continue;
-            }
-            if(blocked.has(k)){
-                continue;
-            }
-
-            visited.add(k);
-            parent.set(k,cur);
-            queue.push({x:nx,y:ny});
-        }
-    }
-    return null;
 }
 
 function safefallback() {
@@ -299,7 +279,26 @@ function safefallback() {
         }
     }
 
-    return { x: 0, y: 0 };
+    return direction;
+}
+
+function isAppleSafe(){
+    const head=Snake.body[0];
+    const pathtoapple=bfsPath(head,apple,Snake.body);
+    if(!pathtoapple){
+        return false;
+    }
+    const simulatedbody=Snake.body.map(seg=>({...seg}));
+    for(let i=1;i<pathtoapple.length;i++){
+        simulatedbody.unshift(pathtoapple[i]);
+        simulatedbody.pop();
+    }
+
+     const new_head=simulatedbody[0];
+     const new_tail=simulatedbody[simulatedbody.length-1];
+     const pathtotail=bfsPath(new_head,new_tail,simulatedbody);
+    return (pathtotail!==null);
+
 }
 
 gameLoop();
