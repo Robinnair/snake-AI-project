@@ -45,3 +45,33 @@ canvas{
         opacity: 0.85;
     }
 }
+
+
+.auto{
+    background-color: purple;
+    color:white;
+    font-size: 50px;
+    font-family:Arial, Helvetica, sans-serif;
+    border:none;
+}
+
+.auto:hover{
+    color:purple;
+    border:solid;
+    background-color: black;
+}
+
+
+.Manuel{
+    background-color: purple;
+    color:white;
+    font-size: 50px;
+    font-family:Arial, Helvetica, sans-serif;
+    border:none;
+}
+
+.Manuel:hover{
+    color:purple;
+    border:solid;
+    background-color: black;
+}
