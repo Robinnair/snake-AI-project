@@ -23,6 +23,10 @@ let appleSoundEffect = new Audio("snd-crownshrink.mp3");
 appleSoundEffect.volume = 0.6;
 bgmusic.loop = true;
 
+let isAutoMode = true;
+let gameStarted = false;
+let score = 0;
+
 const DIRS =
     [{ x: 0, y: 1 },//down
     { x: 0, y: -1 },//up
@@ -153,6 +157,8 @@ function movesnake(dir) {
         appleSoundEffect.play();
         Snake.body.unshift(newhead);
         spawnapple();
+        score++;
+        document.querySelector('#score').innerHTML = `Score: ${score}`;
     }
     else {
         Snake.body.unshift(newhead);
@@ -163,9 +169,16 @@ function movesnake(dir) {
 }
 
 function gameLoop(time = 0) {
+    if (!gameStarted) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
     if (!gameover && time - lastTime > moveInterval) {
-        const aidir = aichoosepath();
-        movesnake(aidir);
+        let moveDir = direction;
+        if (isAutoMode) {
+            moveDir = aichoosepath();
+        }
+        movesnake(moveDir);
         lastTime = time;
     }
     if (gameover) {
@@ -177,6 +190,23 @@ function gameLoop(time = 0) {
     }
     requestAnimationFrame(gameLoop);
 }
+
+// Button event listeners
+document.querySelector('.Manuel').addEventListener('click', () => {
+    isAutoMode = false;
+    if (!gameStarted) {
+        gameStarted = true;
+        requestAnimationFrame(gameLoop);
+    }
+});
+
+document.querySelector('.auto').addEventListener('click', () => {
+    isAutoMode = true;
+    if (!gameStarted) {
+        gameStarted = true;
+        requestAnimationFrame(gameLoop);
+    }
+});
 
 //BFS LOGIC:
 
