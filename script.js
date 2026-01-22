@@ -19,8 +19,6 @@ deathSound.volume = 1;
 let musicstart = false;
 let bgmusic = new Audio("sound/Toby Fox - DELTARUNE Chapters 3+4 OST - 33 SWORD.mp3");
 bgmusic.volume = 0.3;
-let appleSoundEffect = new Audio("snd-crownshrink.mp3");
-appleSoundEffect.volume = 0.6;
 bgmusic.loop = true;
 
 let isAutoMode = true;
@@ -36,36 +34,42 @@ const DIRS =
 
 ctx.scale(20, 20);
 let direction = { x: 0, y: -1 };
+let nextDirection = { x: 0, y: -1 };
 document.addEventListener('keydown', event => {
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        event.preventDefault();
+    }
+
     if (event.key == 'ArrowDown' && direction.y !== -1) {
         if (!musicstart) {
             bgmusic.play();
             musicstart = true;
         }
-        direction = { x: 0, y: 1 };
+        nextDirection = { x: 0, y: 1 };
     }
     if (event.key == 'ArrowUp' && direction.y !== 1) {
         if (!musicstart) {
             bgmusic.play();
             musicstart = true;
         }
-        direction = { x: 0, y: -1 };
+        nextDirection = { x: 0, y: -1 };
     }
     if (event.key == 'ArrowLeft' && direction.x !== 1) {
         if (!musicstart) {
             bgmusic.play();
             musicstart = true;
         }
-        direction = { x: -1, y: 0 };
+        nextDirection = { x: -1, y: 0 };
     }
     if (event.key == 'ArrowRight' && direction.x !== -1) {
         if (!musicstart) {
             bgmusic.play();
             musicstart = true;
         }
-        direction = { x: 1, y: 0 };
+        nextDirection = { x: 1, y: 0 };
     }
 });
+
 
 function createSnake() {
     return {
@@ -153,8 +157,6 @@ function movesnake(dir) {
     }
 
     if (willgrow) {
-        appleSoundEffect.currentTime = 0;
-        appleSoundEffect.play();
         Snake.body.unshift(newhead);
         spawnapple();
         score++;
@@ -174,6 +176,7 @@ function gameLoop(time = 0) {
         return;
     }
     if (!gameover && time - lastTime > moveInterval) {
+        direction = nextDirection;
         let moveDir = direction;
         if (isAutoMode) {
             moveDir = aichoosepath();
